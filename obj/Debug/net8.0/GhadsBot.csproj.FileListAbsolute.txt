@@ -1,0 +1,14 @@
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/bin/Debug/net8.0/GhadsBot
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/bin/Debug/net8.0/GhadsBot.deps.json
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/bin/Debug/net8.0/GhadsBot.runtimeconfig.json
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/bin/Debug/net8.0/GhadsBot.dll
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/bin/Debug/net8.0/GhadsBot.pdb
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.GeneratedMSBuildEditorConfig.editorconfig
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.AssemblyInfoInputs.cache
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.AssemblyInfo.cs
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.csproj.CoreCompileInputs.cache
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.dll
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/refint/GhadsBot.dll
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.pdb
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/GhadsBot.genruntimeconfig.cache
+/home/nm/MyWorld/Workspace/GhadsBot/GhadsBot/obj/Debug/net8.0/ref/GhadsBot.dll
