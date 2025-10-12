@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GhadsBot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c92b3bde9aff1b74e620fe174ba45be7c67eabe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a5a7823284dab3ab784438ed3f30f63b9f0ebbda")]
 [assembly: System.Reflection.AssemblyProductAttribute("GhadsBot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GhadsBot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

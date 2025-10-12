@@ -18,7 +18,54 @@ internal class Program
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
-        await bot.SendMessageAsync("hallotest");
-        await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
+        bool running = true;
+
+        PrintMenu();
+        while (running)
+        {
+            string? input = Console.ReadLine();
+            if (!Int32.TryParse(input, out int choice))
+            {
+                Console.WriteLine("Ugyldigt input, prøv igen");
+            }
+            else
+            {
+                
+                switch (choice)
+                {
+                    case 0:
+                        running = false;
+                        break;
+                    case 1:
+                        Console.WriteLine("Indtast besked til at sende til botten:");
+                        string? message = Console.ReadLine();
+                        try
+                        {
+                            await bot.SendMessageAsync(message);
+                        }catch(NullReferenceException nre){
+                            Console.WriteLine("Beskeden må ikke være tom, prøv igen" + nre.Message);
+                        }finally{
+                            PrintMenu();
+                        }
+                        
+                        break;
+                    case 2:
+                        await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
+                        break;
+                    default:
+                        Console.WriteLine("Ugyldigt input, prøv igen");
+                        break;
+                }
+
+            }
+        }
+
+    }
+    public static void PrintMenu()
+    {
+        Console.WriteLine("Vælg en mulighed:");
+        Console.WriteLine("1. Send besked til botten");
+        Console.WriteLine("2. Hent seneste besked sendt til botten"); 
+        Console.WriteLine("0. Afslut");
     }
 }

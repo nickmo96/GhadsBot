@@ -5,8 +5,8 @@ namespace GhadsBot;
 
 public class TelegramBot
 {
-    private readonly string _token = "8393432003:AAFCByo9c06ZvAd2U1SHvDo-bq-h26sp-M8";
-    private readonly string _chatId = "7091701318";
+    private readonly string _token = "8393432003:AAFCByo9c06ZvAd2U1SHvDo-bq-h26sp-M8"; 
+    private readonly string _chatId = "7091701318"; //chatId til min test chat med botten, skal ændres til at være dynamisk senere
     private readonly HttpClient _client;
 
     public TelegramBot()
@@ -31,6 +31,6 @@ public class TelegramBot
         var response = await _client.SendAsync(request);
         string content = await response.Content.ReadAsStringAsync();
         Console.WriteLine(content);
-        Console.WriteLine(response.StatusCode); 
+        //Console.WriteLine(response.StatusCode); 
     }
 }
