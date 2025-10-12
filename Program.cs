@@ -12,12 +12,13 @@ internal class Program
 // BotFather fra Telegram
 // https://core.telegram.org/bots/api  Telegram Bot API Documentation
 // postman generet kode til http request og repsonen 
-//TODO: MVC, UI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
-//ide: indehendte data fra en hjemmeside og sende det som besked
+//TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
+//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked
 {
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
+         //bot.ListenAsync();
         bool running = true;
 
         PrintMenu();
@@ -30,6 +31,7 @@ internal class Program
             }
             else
             {
+               
                 
                 switch (choice)
                 {
@@ -47,10 +49,12 @@ internal class Program
                         }finally{
                             PrintMenu();
                         }
-                        
                         break;
                     case 2:
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
+                        break;
+                    case 3:
+                        await bot.ListenAsync(); //viser alle beskeder sendt til botten
                         break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
@@ -65,7 +69,8 @@ internal class Program
     {
         Console.WriteLine("Vælg en mulighed:");
         Console.WriteLine("1. Send besked til botten");
-        Console.WriteLine("2. Hent seneste besked sendt til botten"); 
+        Console.WriteLine("2. Hent seneste besked sendt til botten");
+        Console.WriteLine("3. Vis alle beskeder sendt til botten");
         Console.WriteLine("0. Afslut");
     }
 }
