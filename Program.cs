@@ -11,6 +11,8 @@ internal class Program
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
+        await bot.GetUpdatesAsync();
         await bot.SendMessageAsync("hallotest");
+        await bot.GetUpdatesAsync();
     }
 }
