@@ -41,7 +41,7 @@ internal class Program
                         running = false;
                         break;
                     case 1:
-                        Console.WriteLine("Indtast besked til at sende til botten:");
+                        Console.WriteLine("Indtast besked til at sende til botten:"); //case 1 skal finjusteret
                         string? message = Console.ReadLine();
                         long? id = await bot.GetChatIdAsync();
                         if (id != null)
@@ -49,9 +49,21 @@ internal class Program
                             await bot.SendMessageAsync(message, id.Value.ToString());
                         }
                         {
-                            Console.WriteLine("Ingen chatId fundet. Send en besked til botten først.");
+                            Console.WriteLine("Ingen chatId fundet. Send en besked til botten først.\n ønsker du at sende en besked til min bot? (ja/nej)");
+                            string? response = Console.ReadLine();
+                            if (response != null && response.ToLower() == "ja")
+                            {
+                                long botChatId = 7091701318; // Mit chatId til test med botten
+                                await bot.SendMessageAsync(message, botChatId.ToString());
+                                break;
+
                         }
-                        break;
+                            else
+                            {
+                                Console.WriteLine("Besked ikke sendt. Afslutter.");
+                                break;
+                            }
+                        }
                     case 2:
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
                         break;

@@ -76,6 +76,7 @@ public class TelegramBot
 
 
     public async Task CommandListenerAsync() //TODO VIRKER MEN IKKE OPTIMALT LÆSER BESKEDER NÅR MAN SKAL BRUGE DEM SENERE FIXIFIIXFIFXI
+    //overvej at dele metoden op i mindre metoder
     {
         bool listening = true;
         while (listening)
@@ -90,7 +91,7 @@ public class TelegramBot
         JObject json = JObject.Parse(content); //parser json data fra response
         JToken? messages = json["result"]; //henter som json array der indeholder alle parsede json objekter 
 
-if(messages != null)
+           if(messages != null)
             foreach (JToken item in messages)
             {
                 if (item != null)
