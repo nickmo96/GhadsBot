@@ -13,13 +13,13 @@ internal class Program
 // https://core.telegram.org/bots/api  Telegram Bot API Documentation
 // postman generet kode til http request og repsonen 
 //TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
-//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked
+//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj User og Logging
 {
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
         //bot.ListenAsync();
-        bot.CommandListenerAsync();
+        //bot.CommandListenerAsync();
         bool running = true;
 
         PrintMenu();
@@ -43,21 +43,19 @@ internal class Program
                     case 1:
                         Console.WriteLine("Indtast besked til at sende til botten:");
                         string? message = Console.ReadLine();
-                        try
-                        {
+                        if(message != null)
                             await bot.SendMessageAsync(message);
-                        }catch(NullReferenceException nre){
-                            Console.WriteLine("Beskeden må ikke være tom, prøv igen" + nre.Message);
-                        }finally{
-                            PrintMenu();
-                        }
                         break;
                     case 2:
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
                         break;
-                    // case 3:
-                    //     // await bot.CommandListenerAsync(); //viser alle beskeder sendt til botten
-                    //     // break;
+                    case 3:
+                          long chatId = (long)await bot.GetChatIdAsync(); //viser alle beskeder sendt til botten
+                        break;
+                    case 4:
+                        Console.WriteLine("Lytter efter beskeder sendt til botten...");
+                        await bot.CommandListenerAsync(); 
+                        break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
                         break;
@@ -72,7 +70,8 @@ internal class Program
         Console.WriteLine("Vælg en mulighed:");
         Console.WriteLine("1. Send besked til botten");
         Console.WriteLine("2. Hent seneste besked sendt til botten");
-        Console.WriteLine("3. Vis alle beskeder sendt til botten");
+        Console.WriteLine("3. Hent chat ID");
+        Console.WriteLine("4. Lyt efter beskeder sendt til botten (bugged men funktion 2");
         Console.WriteLine("0. Afslut");
     }
 }
