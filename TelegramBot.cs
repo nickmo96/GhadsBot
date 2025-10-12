@@ -9,7 +9,7 @@ namespace GhadsBot;
 public class TelegramBot
 {
     private readonly string _token = "8393432003:AAFCByo9c06ZvAd2U1SHvDo-bq-h26sp-M8";
-    private readonly string _chatId = "7091701318"; //chatId til min test chat med botten, skal ændres til at være dynamisk senere
+    //private readonly string _mitChatId = "7091701318"; //chatId til min test chat med botten, skal ændres til at være dynamisk senere
     private readonly HttpClient _client;
     private long _offset; //holder styr på hvilken besked der er læst så vi ikke læser den samme besked flere gange
 
@@ -19,9 +19,9 @@ public class TelegramBot
         _offset = 0; 
     }
 
-    public async Task SendMessageAsync(string message) //sender KUN besked til mig skal fixes. 
+    public async Task SendMessageAsync(string message, string chatId) //sender KUN besked til mig skal fixes. 
     {
-        string url = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={_chatId}&text={message}";
+        string url = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={message}";
         var request = new HttpRequestMessage(HttpMethod.Post, url);
         var response = await _client.SendAsync(request);
         string content = await response.Content.ReadAsStringAsync();
@@ -62,16 +62,6 @@ public class TelegramBot
 
         return res; //returnerer null hvis der ikke er nogen beskeder   
 }
-
-    public async Task SendMessageAsync2(string message, string chatId) //overload til at sende besked til et specifikt chatId
-    {
-        string url = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={message}";
-        var request = new HttpRequestMessage(HttpMethod.Post, url);
-        var response = await _client.SendAsync(request);
-        string content = await response.Content.ReadAsStringAsync();
-        Console.WriteLine(content);
-        //Console.WriteLine(response.StatusCode); kan bruges til debugging
-    }
 
     public async Task GetUpdatesAsync()
     {
@@ -115,13 +105,19 @@ if(messages != null)
                         switch (messageText)
                         {
                             case "/hej":
-                                await SendMessageAsync("ankergren");
+                                await SendMessageAsync("ankergren", chatId!);
                                 break;
                             case "/help":
-                                await SendMessageAsync("kommandoer: /hej - Bot siger hej /help - Vis denne besked");
-                                break;
+                                await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /help - Vis denne besked", chatId);
+                                    break;
+                                case "/nadia":
+                                for(int i = 0; i < 100; i++)
+                                    {
+                                        await SendMessageAsync("Nadia er grim", chatId);
+                                    }
+                                    break;
                             default:
-                                await SendMessageAsync("Ugyldig kommando. prøv /help");
+                                await SendMessageAsync("Ugyldig kommando. prøv /help", chatId);
                                 break;
                         }
                         Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");

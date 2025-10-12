@@ -43,8 +43,14 @@ internal class Program
                     case 1:
                         Console.WriteLine("Indtast besked til at sende til botten:");
                         string? message = Console.ReadLine();
-                        if(message != null)
-                            await bot.SendMessageAsync(message);
+                        long? id = await bot.GetChatIdAsync();
+                        if (id != null)
+                        {
+                            await bot.SendMessageAsync(message, id.Value.ToString());
+                        }
+                        {
+                            Console.WriteLine("Ingen chatId fundet. Send en besked til botten først.");
+                        }
                         break;
                     case 2:
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
