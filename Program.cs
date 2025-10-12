@@ -1,5 +1,12 @@
 ﻿using GhadsBot;
+//HVORDAN DU BRUGER BOTTEN:
+//1. Opret din egen bot på Telegram ved at sende besked til BotFather (https://t.me/botfather) og følg instruktionerne for at få en API-token.
+//1.1 ELLER Brug min bot ved at søge efter @nickmoghadam_bot i Telegram og starte en chat med den ved at sende en besked.(SKIP SKRIDT 2)
 
+//2. Kopier API-token og indsæt den i _token variablen i TelegramBot klassen
+//3. Find dit chat ID ved at sende en besked til botten og derefter kalde GetUpdatesAsync metoden i koden nedenfor. Chat ID'et vil retuneres som id.
+//4. Indsæt dit chat ID i _chatId variablen i TelegramBot klassen
+//5. Kør programmet for at sende en besked til botten.
 
 internal class Program
 // BotFather fra Telegram
@@ -11,8 +18,7 @@ internal class Program
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
-        await bot.GetUpdatesAsync();
         await bot.SendMessageAsync("hallotest");
-        await bot.GetUpdatesAsync();
+        await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
     }
 }
