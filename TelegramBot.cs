@@ -11,6 +11,7 @@ public class TelegramBot
     private readonly string _token = "8393432003:AAFCByo9c06ZvAd2U1SHvDo-bq-h26sp-M8";
     private readonly string _chatId = "7091701318"; //chatId til min test chat med botten, skal ændres til at være dynamisk senere
     private readonly HttpClient _client;
+    private long _offset = 0; //holder styr på hvilken besked der er læst så vi ikke læser den samme besked flere gange
 
     public TelegramBot()
     {
@@ -47,41 +48,62 @@ public class TelegramBot
 
 
 
-    public async Task ListenAsync() //TODO ikke færdig implementeret
+    public async Task CommandListenerAsync() //TODO VIRKER MED SPAMMER TERMINALEN
     {
-        long offset = 0; //holder styr på hvilken besked der er læst så vi ikke læser den samme besked flere gange
-
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.telegram.org/bot{_token}/getUpdates?offset={offset}");
+        bool listening = true;
+        while (listening)
+        {
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}");
         var response = await _client.SendAsync(request);
         //response.EnsureSuccessStatusCode();
         string content = await response.Content.ReadAsStringAsync();
-        Console.WriteLine(content);
+        //Console.WriteLine(content);
 
 
         JObject json = JObject.Parse(content); //parser json data fra response
         JToken? messages = json["result"]; //henter som json array der indeholder alle parsede json objekter 
 
-        foreach(JToken item in messages)
-        {
-            if(item != null)
+            foreach (JToken item in messages)
             {
-                long updateId = (long)item["update_id"];
-                string messageText = item["message"]?["text"]?.ToString();
-                string chatId = item["message"]?["chat"]?["id"]?.ToString();
-                string entity = item["message"]?["entities"]?[0]?["type"]?.ToString();
+                if (item != null)
+                {
+
+                    long updateId = (long)item["update_id"];
+                    string messageText = item["message"]?["text"]?.ToString();
+                    string chatId = item["message"]?["chat"]?["id"]?.ToString();
+                    string entity = item["message"]?["entities"]?[0]?["type"]?.ToString();
+                    if (entity == "bot_command")
+                    {
+                        switch (messageText)
+                        {
+                            case "/hej":
+                                await SendMessageAsync("ankergren");
+                                break;
+                            case "/help":
+                                await SendMessageAsync("kommandoer: /hej - Bot siger hej /help - Vis denne besked");
+                                break;
+                            default:
+                                await SendMessageAsync("Ugyldig kommando. prøv /help");
+                                break;
+                        }
+                        Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
+                    }
+                    _offset = updateId + 1; //opdaterer offset til næste besked
+                }
+
             }
+        await Task.Delay(1000);
+            
         }
-        
 
-        // if (messages != null)
-
-
-        //       offset = (long)update["update_id"] + 1;
-        //     }
     }
 }
 
-            //await Task.Delay(1000);
+          
         
     
 

@@ -24,6 +24,7 @@ internal class Program
         PrintMenu();
         while (running)
         {
+            await bot.CommandListenerAsync();
             string? input = Console.ReadLine();
             if (!Int32.TryParse(input, out int choice))
             {
@@ -53,9 +54,9 @@ internal class Program
                     case 2:
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
                         break;
-                    case 3:
-                        await bot.ListenAsync(); //viser alle beskeder sendt til botten
-                        break;
+                    // case 3:
+                    //     // await bot.CommandListenerAsync(); //viser alle beskeder sendt til botten
+                    //     // break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
                         break;
