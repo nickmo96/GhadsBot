@@ -18,13 +18,14 @@ internal class Program
     private async static Task Main(string[] args)
     {
         TelegramBot bot = new TelegramBot();
-         //bot.ListenAsync();
+        //bot.ListenAsync();
+        bot.CommandListenerAsync();
         bool running = true;
 
         PrintMenu();
         while (running)
         {
-            await bot.CommandListenerAsync();
+            
             string? input = Console.ReadLine();
             if (!Int32.TryParse(input, out int choice))
             {
