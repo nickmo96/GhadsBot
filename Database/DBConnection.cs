@@ -19,6 +19,11 @@ namespace GhadsBot.Database
         }
 
         
-
+        public DBConnection GetInstance() {
+            if(_instance == null) {
+                _instance = new DBConnection();
+            }
+            return _instance;
+        }
     }
 }
