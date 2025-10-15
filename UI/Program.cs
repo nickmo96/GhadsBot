@@ -1,4 +1,5 @@
-﻿using GhadsBot.Service;
+﻿using GhadsBot.Database;
+using GhadsBot.Service;
 //HVORDAN DU BRUGER BOTTEN:
 //1. Opret din egen bot på Telegram ved at sende besked til BotFather (https://t.me/botfather) og følg instruktionerne for at få en API-token.
 //1.1 ELLER Brug min bot ved at søge efter @nickmoghadam_bot i Telegram og starte en chat med den ved at sende en besked.(SKIP SKRIDT 2)
@@ -79,6 +80,10 @@ internal class Program
                         string? msg = Console.ReadLine();
                         await bot.SendMessageAsync(msg, "7988478482"); //min chatId
                         break;
+                    case 6:
+                        DBConnection db = new DBConnection();
+                        db.TryConnection();
+                        break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
                         break;
@@ -96,6 +101,7 @@ internal class Program
         Console.WriteLine("3. Hent chat ID");
         Console.WriteLine("4. Lyt efter beskeder sendt til botten (bugged men funktion 2");
         Console.WriteLine("5. Send besked til Benyamin");
+        Console.WriteLine("6. Test DB forbindelse");
         Console.WriteLine("0. Afslut");
         
     }
