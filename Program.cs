@@ -72,7 +72,12 @@ internal class Program
                         break;
                     case 4:
                         Console.WriteLine("Lytter efter beskeder sendt til botten...");
-                        await bot.CommandListenerAsync(); 
+                        await bot.CommandListenerAsync();
+                        break;
+                    case 5:
+                        Console.WriteLine("Skriv besked med chatId");
+                        string? msg = Console.ReadLine();
+                        await bot.SendMessageAsync(msg, "7988478482"); //min chatId
                         break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
@@ -90,6 +95,7 @@ internal class Program
         Console.WriteLine("2. Hent seneste besked sendt til botten");
         Console.WriteLine("3. Hent chat ID");
         Console.WriteLine("4. Lyt efter beskeder sendt til botten (bugged men funktion 2");
+        Console.WriteLine("5. Send besked til Benyamin");
         Console.WriteLine("0. Afslut");
     }
 }
