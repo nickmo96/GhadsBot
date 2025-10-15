@@ -4,7 +4,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
 //bruger Newtonsoft.Json til at parse json data
-namespace GhadsBot;
+namespace GhadsBot.Service;
 
 public class TelegramBot
 {

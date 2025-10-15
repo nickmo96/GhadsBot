@@ -1,4 +1,4 @@
-﻿using GhadsBot;
+﻿using GhadsBot.Service;
 //HVORDAN DU BRUGER BOTTEN:
 //1. Opret din egen bot på Telegram ved at sende besked til BotFather (https://t.me/botfather) og følg instruktionerne for at få en API-token.
 //1.1 ELLER Brug min bot ved at søge efter @nickmoghadam_bot i Telegram og starte en chat med den ved at sende en besked.(SKIP SKRIDT 2)
