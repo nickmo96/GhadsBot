@@ -72,7 +72,7 @@ public class TelegramBot
         Console.WriteLine(content);
         //Console.WriteLine(response.StatusCode); 
     }
-
+    
 
 
     public async Task CommandListenerAsync() //TODO VIRKER MEN IKKE OPTIMALT LÆSER BESKEDER NÅR MAN SKAL BRUGE DEM SENERE FIXIFIIXFIFXI

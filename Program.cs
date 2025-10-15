@@ -97,5 +97,6 @@ internal class Program
         Console.WriteLine("4. Lyt efter beskeder sendt til botten (bugged men funktion 2");
         Console.WriteLine("5. Send besked til Benyamin");
         Console.WriteLine("0. Afslut");
+        
     }
 }

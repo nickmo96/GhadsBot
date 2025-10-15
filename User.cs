@@ -1,4 +1,4 @@
-public class User
+public class Person
 {
     public long ChatId { get; set; }
     public string? FirstName { get; set; }
@@ -6,7 +6,7 @@ public class User
     public string? Username { get; set; }
 
 
-    public User(long chatId, string? firstName, string? lastName, string? username)
+    public Person(long chatId, string? firstName, string? lastName, string? username)
     {
         ChatId = chatId;
         FirstName = firstName;
