@@ -97,7 +97,7 @@ public class TelegramBot
                     if (item != null)
                     {
 
-                        long? updateId = (long)item["update_id"];
+                        long? updateId = item.Value<long>("update_id");
                         string? messageText = item["message"]?["text"]?.ToString();
                         string? chatId = item["message"]?["chat"]?["id"]?.ToString();
                         string? entity = item["message"]?["entities"]?[0]?["type"]?.ToString(); //tjekker om beskeden er en kommando
@@ -106,19 +106,28 @@ public class TelegramBot
                             switch (messageText)
                             {
                                 case "/hej":
-                                    await SendMessageAsync("HEJSA", chatId!);
+                                    if (chatId != null)
+                                    {
+                                        await SendMessageAsync("Ugyldig kommando. prøv /help", chatId);
+                                    }
                                     break;
                                 case "/help":
-                                    await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /help - Vis denne besked", chatId);
+                                    if (chatId != null)
+                                    {
+                                        await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /help - Vis denne besked", chatId);
+
+                                    }
                                     break;
                                 case "/nadia":
-                                    for (int i = 0; i < 10; i++)
+                                    if (chatId != null)
+                                        for (int i = 0; i < 10; i++)
                                     {
                                         await SendMessageAsync("Nadia er smuk", chatId);
                                     }
                                     break;
                                 default:
-                                    await SendMessageAsync("Ugyldig kommando. prøv /help", chatId);
+                                    if (chatId != null)
+                                        await SendMessageAsync(" kommando. prøv /help", chatId);
                                     break;
                             }
                             Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");

@@ -13,7 +13,8 @@ namespace GhadsBot.Database
         private readonly string _getAllQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person";
         private readonly string _insertQuery = "INSERT INTO Person (ChatId, FirstName, LastName, Username) VALUES (@ChatId, @FirstName, @LastName, @Username)";
         private readonly string _getPersonByChatIdQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person WHERE ChatId = @ChatId";
-        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["LinuxConnection"].ConnectionString.ToString();
+        private readonly string _deletePersonByChatIdQuery = "DELETE FROM Person WHERE ChatId = @ChatId";
+        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["WindowsConnection"].ConnectionString.ToString();
 
         public DBPerson()
         {
@@ -70,15 +71,14 @@ namespace GhadsBot.Database
         }
         public Person? GetPersonByChatID(long chatID)
         {
-
             Person? person = null;
+
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
                 conn.Open();
                 using (SqlCommand cmd = new SqlCommand(_getPersonByChatIdQuery, conn))
                 {
                     cmd.Parameters.AddWithValue("@ChatId", chatID);
-
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
@@ -88,13 +88,37 @@ namespace GhadsBot.Database
                             string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
                             string lastName = reader.GetString(reader.GetOrdinal("LastName"));
                             string username = reader.GetString(reader.GetOrdinal("Username"));
+
+                            person = new Person(id, firstName, lastName, username);
                         }
                     }
-
                 }
             }
+
             return person;
+        }
+
+        public void DeletePersonByChatId(long chatId)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(_deletePersonByChatIdQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ChatId", chatId);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected == 0)
+                    {
+                        Console.WriteLine($"Ingen person med ChatId {chatId} fundet.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Person med ChatId {chatId} slettet.");
+                    }
+                }
+            }
         }
     }
 }
+
 
