@@ -16,6 +16,7 @@ internal class Program
 // postman generet kode til http request og repsonen 
 //TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
 //TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj User og Logging
+//TODO: TUI OG COmmands til HAshMap og ENUM
 {
     private async static Task Main(string[] args)
     {
