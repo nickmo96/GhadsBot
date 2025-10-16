@@ -19,7 +19,7 @@ public class TelegramBot
         _offset = 0; 
     }
 
-    public async Task SendMessageAsync(string message, string chatId) //sender KUN besked til mig skal fixes. 
+    public async Task SendMessageAsync(string message, string chatId)  
     {
         string url = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={message}";
         var request = new HttpRequestMessage(HttpMethod.Post, url);

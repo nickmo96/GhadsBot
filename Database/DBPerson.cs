@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,12 @@ namespace GhadsBot.Database
     {
         private readonly string _getAllQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person";
         private readonly string _insertQuery = "INSERT INTO Person (ChatId, FirstName, LastName, Username) VALUES (@ChatId, @FirstName, @LastName, @Username)";
+        private readonly string _getPersonByChatIdQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person WHERE ChatId = @ChatId";
         private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["LinuxConnection"].ConnectionString.ToString();
-        
+
         public DBPerson()
         {
-          
+
         }
 
 
@@ -38,7 +40,7 @@ namespace GhadsBot.Database
                         string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
                         string lastName = reader.GetString(reader.GetOrdinal("LastName"));
                         string username = reader.GetString(reader.GetOrdinal("Username"));
-                        Person p = new Person(chatId, firstName , lastName, username);
+                        Person p = new Person(chatId, firstName, lastName, username);
                         persons.Add(p);
                     }
                 }
@@ -63,7 +65,35 @@ namespace GhadsBot.Database
 
 
                 }
+
             }
+        }
+        public Person? GetPersonByChatID(long chatID)
+        {
+
+            Person? person = null;
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(_getPersonByChatIdQuery, conn))
+                {
+                    cmd.Parameters.AddWithValue("@ChatId", chatID);
+
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            long id = reader.GetInt64(reader.GetOrdinal("ChatId"));
+                            string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                            string lastName = reader.GetString(reader.GetOrdinal("LastName"));
+                            string username = reader.GetString(reader.GetOrdinal("Username"));
+                        }
+                    }
+
+                }
+            }
+            return person;
         }
     }
 }
