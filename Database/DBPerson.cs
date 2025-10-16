@@ -113,7 +113,7 @@ namespace GhadsBot.Database
                     }
                     else
                     {
-                        Console.WriteLine($"Person med ChatId {chatId} slettet.");
+                        Console.WriteLine($"Person med ChatId {chatId} slettet t.");
                     }
                 }
             }
