@@ -82,13 +82,12 @@ internal class Program
                         await bot.SendMessageAsync(msg, "7988478482"); //min chatId
                         break;
                     case 6:
-                        Person p = new Person(1, "Nick", "Mo", "Nickmo123");
                         DBPerson db = new DBPerson();
                         Console.WriteLine("alle personer i DB");
-                        db.GetAllPersons();
-                        Console.WriteLine($"{ p}  blev sat ind i db");
-                        db.InsertPerson(p);
-                        Console.WriteLine("alle personer i DB");
+                       foreach(Person person in db.GetAllPersons())
+                        {
+                            Console.WriteLine(person.ToString());
+                        }
                         break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
