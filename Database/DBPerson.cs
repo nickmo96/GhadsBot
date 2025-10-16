@@ -59,9 +59,14 @@ namespace GhadsBot.Database
                     cmd.CommandText = _insertQuery;
 
                     cmd.Parameters.AddWithValue("@ChatId", person.ChatId);
-                    cmd.Parameters.AddWithValue("@FirstName", person.FirstName);
-                    cmd.Parameters.AddWithValue("@LastName", person.LastName);
-                    cmd.Parameters.AddWithValue("@Username", person.Username);
+                    cmd.Parameters.AddWithValue("@FirstName", person?.FirstName);
+                    cmd.Parameters.AddWithValue("@LastName", person?.LastName);
+                    cmd.Parameters.AddWithValue("@Username", person?.Username);
+                    if(person?.Username == null)
+                    {
+                        cmd.Parameters["@Username"].Value = "Ukendt";
+                    }
+
                     cmd.ExecuteNonQuery();
 
 
@@ -69,27 +74,31 @@ namespace GhadsBot.Database
 
             }
         }
-        public Person? GetPersonByChatID(long chatID)
+        public async  Task<Person?> GetPersonByChatIDAsync(long chatID)
         {
             Person? person = null;
 
             using (SqlConnection conn = new SqlConnection(_connectionString))
             {
-                conn.Open();
+                await conn.OpenAsync();
                 using (SqlCommand cmd = new SqlCommand(_getPersonByChatIdQuery, conn))
                 {
                     cmd.Parameters.AddWithValue("@ChatId", chatID);
 
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
-                        if (reader.Read())
+                        if (await reader.ReadAsync())
                         {
                             long id = reader.GetInt64(reader.GetOrdinal("ChatId"));
                             string firstName = reader.GetString(reader.GetOrdinal("FirstName"));
                             string lastName = reader.GetString(reader.GetOrdinal("LastName"));
                             string username = reader.GetString(reader.GetOrdinal("Username"));
+                            if (username == null)
+                            {
+                                username = "Ukendt";
+                            }
 
-                            person = new Person(id, firstName, lastName, username);
+                                person = new Person(id, firstName, lastName, username);
                         }
                     }
                 }

@@ -120,7 +120,7 @@ internal class Program
                         string? cID = Console.ReadLine();
                         long.TryParse(cID, out long parsedID);
                         DBPerson dbp = new DBPerson();
-                        Person? personById = dbp.GetPersonByChatID(parsedID);
+                        Person? personById = await dbp.GetPersonByChatIDAsync(parsedID);
 
                         if (personById != null)
                             Console.WriteLine(personById.ToString());
@@ -137,7 +137,7 @@ internal class Program
                         break;
                     case 10:
                         HTMLParser parser = new HTMLParser();
-                        parser.GetTempatureCPH();
+                        await parser.GetTemperatureCPH();
                         break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");

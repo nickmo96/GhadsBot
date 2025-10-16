@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace GhadsBot.Service
 {
@@ -15,23 +17,32 @@ namespace GhadsBot.Service
         }
 
 
-        public async Task GetTempatureCPH()
+        public async Task<double> GetTemperatureCPH()
         {
+            double result = 0;
             var client = new HttpClient();
             var request = new HttpRequestMessage(
                 HttpMethod.Get,
                 "https://api.open-meteo.com/v1/metno?latitude=55.6761&longitude=12.5683&current=temperature_2m"
             );
+
             var response = await client.SendAsync(request);
             string res = await response.Content.ReadAsStringAsync();
 
-            if(res.Contains("temperature_2m"))
+            JObject json = JObject.Parse(res);
+            string? tempString = json["current"]?["temperature_2m"]?.ToString();
+
+            if (double.TryParse(tempString, out double temperatur))
             {
-                int startIndex = res.IndexOf("temperature_2m") + "temperature_2m".Length + 3; // +3 for '": '
-                int endIndex = res.IndexOf(",", startIndex);
-                string temperature = res.Substring(startIndex, endIndex - startIndex);
-                Console.WriteLine($"Temperaturen i KBH er: {temperature}°C");
+                Console.WriteLine($"Temperaturen i København er: {temperatur}°C");
+                result = temperatur;
             }
+            else
+            {
+                Console.WriteLine("Kunne ikke hente temperaturen fra JSON-dataen.");
+            }
+
+            return result;
         }
     }
 }

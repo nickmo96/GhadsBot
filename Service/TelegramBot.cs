@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using GhadsBot.Database;
 
 //bruger Newtonsoft.Json til at parse json data
 namespace GhadsBot.Service;
@@ -70,6 +71,41 @@ public class TelegramBot
         var response = await _client.SendAsync(request);
         string content = await response.Content.ReadAsStringAsync();
         Console.WriteLine(content);
+
+
+        JObject json = JObject.Parse(content); //parser json data fra response
+        JToken? messages = json["result"]; //henter som json array der indeholder alle parsede json objekter
+        if (messages != null && messages.HasValues)
+        {
+            foreach (JToken item in messages)
+            {
+                if (item != null)
+                {
+                    long chatId = (long)item["message"]?["chat"]?["id"];
+                    string? firstName = item["message"]?["chat"]?["first_name"]?.ToString();
+                    string? lastName = item["message"]?["chat"]?["last_name"]?.ToString();
+                    string? username = item["message"]?["chat"]?["username"]?.ToString();
+
+                   
+                    DBPerson dbp = new DBPerson();
+
+                    if (await dbp.GetPersonByChatIDAsync(chatId) == null)
+                    {
+                        
+                        Person p = new Person(chatId, firstName, lastName, username);
+                        Console.WriteLine($"Ny bruger fundet, tilføjer til database." + p.ToString());
+                        dbp.InsertPerson(p);
+                    }
+
+                    string? messageText = item["message"]?["text"]?.ToString();
+                    Console.WriteLine($"Chat ID: {chatId}, Message: {messageText}");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("Ingen nye beskeder.");
+        }
         //Console.WriteLine(response.StatusCode); 
     }
     
@@ -97,10 +133,12 @@ public class TelegramBot
                     if (item != null)
                     {
 
-                        long? updateId = item.Value<long>("update_id");
-                        string? messageText = item["message"]?["text"]?.ToString();
+                        long updateId = item.Value<long>("update_id");
+                        string ? messageText = item["message"]?["text"]?.ToString();
                         string? chatId = item["message"]?["chat"]?["id"]?.ToString();
                         string? entity = item["message"]?["entities"]?[0]?["type"]?.ToString(); //tjekker om beskeden er en kommando
+
+
                         if (entity == "bot_command")
                         {
                             switch (messageText)
@@ -114,7 +152,7 @@ public class TelegramBot
                                 case "/help":
                                     if (chatId != null)
                                     {
-                                        await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /help - Vis denne besked", chatId);
+                                        await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /temp - viser temperatur i kbh \n /help - Vis denne besked", chatId);
 
                                     }
                                     break;
@@ -123,6 +161,14 @@ public class TelegramBot
                                         for (int i = 0; i < 10; i++)
                                     {
                                         await SendMessageAsync("Nadia er smuk", chatId);
+                                    }
+                                    break;
+                                case "/temp":
+                                    if (chatId != null)
+                                    {
+                                        HTMLParser parser = new HTMLParser();
+                                        double temp = await parser.GetTemperatureCPH();
+                                        await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
                                     }
                                     break;
                                 default:
