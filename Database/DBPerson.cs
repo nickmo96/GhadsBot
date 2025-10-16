@@ -11,7 +11,7 @@ namespace GhadsBot.Database
     {
         private readonly string _getAllQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person";
         private readonly string _insertQuery = "INSERT INTO Person (ChatId, FirstName, LastName, Username) VALUES (@ChatId, @FirstName, @LastName, @Username)";
-        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["LocalConnection"].ConnectionString.ToString();
+        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["WindowsConnection"].ConnectionString.ToString();
         
         public DBPerson()
         {
