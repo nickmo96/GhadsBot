@@ -21,7 +21,11 @@ namespace GhadsBot.Database
 
         }
 
-
+        //TODO LAV METODE TIL AT LAVE ET PERSON OBJEKT
+        public Person CreatePerson(long chatId, string? firstName, string? lastName, string? username)
+        {
+            return null;
+        }
         public IEnumerable<Person> GetAllPersons()
         {
             List<Person> persons = new List<Person>();

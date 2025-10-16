@@ -108,89 +108,88 @@ public class TelegramBot
         }
         //Console.WriteLine(response.StatusCode); 
     }
-    
 
 
-    public async Task CommandListenerAsync() //TODO VIRKER MEN IKKE OPTIMALT LÆSER BESKEDER NÅR MAN SKAL BRUGE DEM SENERE FIXIFIIXFIFXI
-    //overvej at dele metoden op i mindre metoder
+    public async Task CommandListenerAsync()
     {
         bool listening = true;
         while (listening)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}");
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}"
+            );
+
             var response = await _client.SendAsync(request);
-            //response.EnsureSuccessStatusCode();
             string content = await response.Content.ReadAsStringAsync();
-            //Console.WriteLine(content);
 
-
-            JObject json = JObject.Parse(content); //parser json data fra response
-            JToken? messages = json["result"]; //henter som json array der indeholder alle parsede json objekter 
+            JObject json = JObject.Parse(content);
+            JToken? messages = json["result"];
 
             if (messages != null)
+            {
                 foreach (JToken item in messages)
                 {
-                    if (item != null)
+                    JToken? message = item["message"];
+                    if (message == null) continue;
+
+                    long updateId = item.Value<long>("update_id");
+                    string? messageText = message["text"]?.ToString();
+                    string? entity = message["entities"]?[0]?["type"]?.ToString();
+                    string chatId = message["chat"]?["id"]?.ToString() ?? "0";
+
+      
+                    if (entity == "bot_command")
                     {
-
-                        long updateId = item.Value<long>("update_id");
-                        string ? messageText = item["message"]?["text"]?.ToString();
-                        string? chatId = item["message"]?["chat"]?["id"]?.ToString();
-                        string? entity = item["message"]?["entities"]?[0]?["type"]?.ToString(); //tjekker om beskeden er en kommando
-
-
-                        if (entity == "bot_command")
+                        switch (messageText)
                         {
-                            switch (messageText)
-                            {
-                                case "/hej":
-                                    if (chatId != null)
-                                    {
-                                        await SendMessageAsync("Ugyldig kommando. prøv /help", chatId);
-                                    }
-                                    break;
-                                case "/help":
-                                    if (chatId != null)
-                                    {
-                                        await SendMessageAsync("kommandoer: /hej - Bot siger hej\n /nadia \n /temp - viser temperatur i kbh \n /help - Vis denne besked", chatId);
+                            case "/hej":
+                                await SendMessageAsync("Hej! Hvordan går det?", chatId);
+                                break;
 
-                                    }
-                                    break;
-                                case "/nadia":
-                                    if (chatId != null)
-                                        for (int i = 0; i < 10; i++)
-                                    {
-                                        await SendMessageAsync("Nadia er smuk", chatId);
-                                    }
-                                    break;
-                                case "/temp":
-                                    if (chatId != null)
-                                    {
-                                        HTMLParser parser = new HTMLParser();
-                                        double temp = await parser.GetTemperatureCPH();
-                                        await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
-                                    }
-                                    break;
-                                default:
-                                    if (chatId != null)
-                                        await SendMessageAsync(" kommando. prøv /help", chatId);
-                                    break;
-                            }
-                            Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
+                            case "/help":
+                                await SendMessageAsync(
+                                    "Kommandoer:\n" +
+                                    "/hej - Bot siger hej\n" +
+                                    "/nadia - Spammer Nadia er smuk\n" +
+                                    "/temp - Viser temperatur i Kbh\n" +
+                                    "/help - Viser denne besked", chatId
+                                );
+                                break;
+
+                            case "/nadia":
+                                for (int i = 0; i < 10; i++)
+                                    await SendMessageAsync("Nadia er smuk", chatId);
+                                break;
+
+                            case "/temp":
+                                HTMLParser parser = new HTMLParser();
+                                double temp = await parser.GetTemperatureCPH();
+                                await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
+                                break;
+
+                            default:
+                                await SendMessageAsync("Ukendt kommando. Prøv /help", chatId);
+                                break;
                         }
-                        else
-                        {
-                            Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
-                        }
-                        _offset = (long)(updateId + 1); //opdaterer offset til næste besked
+
+                        Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
                     }
 
+                    _offset = updateId + 1;
                 }
+            }
+
             await Task.Delay(1000);
-
         }
-
     }
+
+
+}
   
 
 }
