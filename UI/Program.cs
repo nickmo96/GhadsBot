@@ -135,6 +135,10 @@ internal class Program
                         DBPerson dbPerson = new DBPerson();
                         dbPerson.DeletePersonByChatId(parsedChatIdToDelete);
                         break;
+                    case 10:
+                        HTMLParser parser = new HTMLParser();
+                        parser.GetTempatureCPH();
+                        break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
                         break;
