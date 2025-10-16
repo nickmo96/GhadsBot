@@ -9,6 +9,7 @@ namespace GhadsBot.Service
 {
     public class HTMLParser
     {
+        private readonly string url;
         public HTMLParser()
         {
         }
