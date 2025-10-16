@@ -14,8 +14,10 @@ internal class Program
 // BotFather fra Telegram
 // https://core.telegram.org/bots/api  Telegram Bot API Documentation
 // postman generet kode til http request og repsonen 
-//TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
-//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj User og Logging
+//TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere
+//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj Logging. 
+
+//TODO: LAV TUI OG COMMANDS TIL HASHMAPS, MÅSKE LAVER ENUMS TIL COMMANDS
 {
     private async static Task Main(string[] args)
     {
@@ -27,7 +29,7 @@ internal class Program
         PrintMenu();
         while (running)
         {
-            Console.WriteLine(">");
+            Console.Write("> ");
             string? input = Console.ReadLine();
             if (!Int32.TryParse(input, out int choice))
             {
@@ -77,7 +79,7 @@ internal class Program
                         await bot.CommandListenerAsync();
                         break;
                     case 5:
-                        Console.WriteLine("Skriv besked med chatId");
+                        Console.WriteLine("Skriv besked til Benyamin");
                         string? msg = Console.ReadLine();
                         await bot.SendMessageAsync(msg, "7988478482"); //min chatId
                         break;
