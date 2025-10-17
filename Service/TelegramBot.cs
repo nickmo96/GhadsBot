@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using GhadsBot.Database;
+using System.Globalization;
+using System.Text.Json;
 
 //bruger Newtonsoft.Json til at parse json data
 namespace GhadsBot.Service;
@@ -109,6 +111,94 @@ public class TelegramBot
         //Console.WriteLine(response.StatusCode); 
     }
 
+    public async Task<string> GetUpdatesOffSetAsync()
+    {
+        string url = $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}";
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var response = await _client.SendAsync(request);
+        string content = await response.Content.ReadAsStringAsync();
+
+        return content;
+
+    }
+     public async Task<List<JToken>> GetUpdatesJObjectAsync()
+    {
+        string content = await GetUpdatesOffSetAsync();
+        JObject json = JObject.Parse(content);
+        List<JToken?> messages = json["result"].ToList();    
+        return messages;  
+    }
+    public async Task CommandListenerAsync2()
+{
+    Console.WriteLine("Listening...");
+    bool listening = true;
+
+    while (listening)
+    {
+        List<JToken>? messages = await GetUpdatesJObjectAsync();
+
+        if (messages != null && messages.Count > 0)
+        {
+            foreach (JToken item in messages)
+            {
+                JToken? message = item["message"];
+                if (message == null) continue;
+
+                long updateId = item.Value<long>("update_id");
+                string? messageText = message["text"]?.ToString();
+                string? entity = message["entities"]?[0]?["type"]?.ToString();
+                string chatId = message["chat"]?["id"]?.ToString() ?? "0";
+
+                if (entity == "bot_command")
+                {
+                    switch (messageText)
+                    {
+                        case "/hej":
+                            await SendMessageAsync("Hej! Hvordan går det?", chatId);
+                            break;
+
+                        case "/help":
+                            await SendMessageAsync(
+                                "Kommandoer:\n" +
+                                "/hej - Bot siger hej\n" +
+                                "/nadia - Spammer Nadia er smuk\n" +
+                                "/temp - Viser temperatur i Kbh\n" +
+                                "/help - Viser denne besked", chatId
+                            );
+                            break;
+
+                        case "/nadia":
+                            for (int i = 0; i < 10; i++)
+                                await SendMessageAsync("Nadia er smuk", chatId);
+                            break;
+
+                        case "/temp":
+                            HTMLParser parser = new HTMLParser();
+                            double temp = await parser.GetTemperatureCPH();
+                            await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
+                            break;
+
+                        default:
+                            await SendMessageAsync("Ukendt kommando. Prøv /help", chatId);
+                            break;
+                    }
+
+                    Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
+                }
+                else
+                {
+                    Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
+                }
+
+                _offset = updateId + 1;
+            }
+        }
+
+        await Task.Delay(1000);
+    }
+}
+
+   
 
     public async Task CommandListenerAsync()
     {
@@ -138,7 +228,7 @@ public class TelegramBot
                     string? entity = message["entities"]?[0]?["type"]?.ToString();
                     string chatId = message["chat"]?["id"]?.ToString() ?? "0";
 
-      
+
                     if (entity == "bot_command")
                     {
                         switch (messageText)
@@ -192,7 +282,7 @@ public class TelegramBot
 }
   
 
-}
+
 
           
         

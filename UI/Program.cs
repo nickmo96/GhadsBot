@@ -24,6 +24,7 @@ internal class Program
         TelegramBot bot = new TelegramBot();
         //bot.ListenAsync();
         //bot.CommandListenerAsync();
+        Task.Run (() => bot.CommandListenerAsync2()); 
         bool running = true;
 
         PrintMenu();

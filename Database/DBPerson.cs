@@ -14,7 +14,7 @@ namespace GhadsBot.Database
         private readonly string _insertQuery = "INSERT INTO Person (ChatId, FirstName, LastName, Username) VALUES (@ChatId, @FirstName, @LastName, @Username)";
         private readonly string _getPersonByChatIdQuery = "SELECT ChatId, FirstName, LastName, Username FROM Person WHERE ChatId = @ChatId";
         private readonly string _deletePersonByChatIdQuery = "DELETE FROM Person WHERE ChatId = @ChatId";
-        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["WindowsConnection"].ConnectionString.ToString();
+        private readonly string _connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["LinuxConnection"].ConnectionString.ToString();
 
         public DBPerson()
         {
@@ -22,10 +22,10 @@ namespace GhadsBot.Database
         }
 
         //TODO LAV METODE TIL AT LAVE ET PERSON OBJEKT
-        public Person CreatePerson(long chatId, string? firstName, string? lastName, string? username)
-        {
-            return null;
-        }
+      //  public Person CreatePerson(long chatId, string? firstName, string? lastName, string? username)
+       // {
+         //   return null;
+       // }
         public IEnumerable<Person> GetAllPersons()
         {
             List<Person> persons = new List<Person>();
