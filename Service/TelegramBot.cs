@@ -111,7 +111,7 @@ public class TelegramBot
         //Console.WriteLine(response.StatusCode); 
     }
 
-    public async Task<string> GetUpdatesOffSetAsync()
+    public async Task<string> FetchTelegramUpdatesUpdates()
     {
         string url = $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -121,21 +121,18 @@ public class TelegramBot
         return content;
 
     }
-     public async Task<List<JToken>> GetUpdatesJObjectAsync()
+     public async Task<List<JToken>> ParseTelegramUpdatesAsync()
     {
-        string content = await GetUpdatesOffSetAsync();
+        string content = await FetchTelegramUpdatesUpdates();
         JObject json = JObject.Parse(content);
         List<JToken?> messages = json["result"].ToList();    
         return messages;  
     }
-    public async Task CommandListenerAsync2()
-{
-    Console.WriteLine("Listening...");
-    bool listening = true;
-
-    while (listening)
+    public async Task CommandListenerAsync()
     {
-        List<JToken>? messages = await GetUpdatesJObjectAsync();
+    while (true)
+    {
+        List<JToken>? messages = await ParseTelegramUpdatesAsync();
 
         if (messages != null && messages.Count > 0)
         {
@@ -147,14 +144,27 @@ public class TelegramBot
                 long updateId = item.Value<long>("update_id");
                 string? messageText = message["text"]?.ToString();
                 string? entity = message["entities"]?[0]?["type"]?.ToString();
-                string chatId = message["chat"]?["id"]?.ToString() ?? "0";
+                string dynamicChatId = message["chat"]?["id"]?.ToString() ?? "0";
+                    long staticChatId = (long)item["message"]?["chat"]?["id"];
+                DBPerson dbp = new DBPerson();
+                if(dbp.GetPersonByChatIDAsync(staticChatId).Result == null)
+                {
+                    string? firstName = item["message"]?["chat"]?["first_name"]?.ToString();
+                    string? lastName = item["message"]?["chat"]?["last_name"]?.ToString();
+                    string? username = item["message"]?["chat"]?["username"]?.ToString();
 
+                    Person p = new Person(staticChatId, firstName, lastName, username);
+                    Console.WriteLine($"Ny bruger fundet, tilføjer til database." + p.ToString());
+                    dbp.InsertPerson(p);
+                }
+
+        
                 if (entity == "bot_command")
                 {
                     switch (messageText)
                     {
                         case "/hej":
-                            await SendMessageAsync("Hej! Hvordan går det?", chatId);
+                            await SendMessageAsync("Hej! Hvordan går det?", dynamicChatId);
                             break;
 
                         case "/help":
@@ -163,31 +173,31 @@ public class TelegramBot
                                 "/hej - Bot siger hej\n" +
                                 "/nadia - Spammer Nadia er smuk\n" +
                                 "/temp - Viser temperatur i Kbh\n" +
-                                "/help - Viser denne besked", chatId
+                                "/help - Viser denne besked", dynamicChatId
                             );
                             break;
 
                         case "/nadia":
                             for (int i = 0; i < 10; i++)
-                                await SendMessageAsync("Nadia er smuk", chatId);
+                                await SendMessageAsync("Nadia er smuk", dynamicChatId);
                             break;
 
                         case "/temp":
                             HTMLParser parser = new HTMLParser();
                             double temp = await parser.GetTemperatureCPH();
-                            await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
+                            await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
                             break;
 
                         default:
-                            await SendMessageAsync("Ukendt kommando. Prøv /help", chatId);
+                            await SendMessageAsync("Ukendt kommando. Prøv /help", dynamicChatId);
                             break;
                     }
 
-                    Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
+                    Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {dynamicChatId}");
                 }
                 else
                 {
-                    Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
+                    Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {dynamicChatId}");
                 }
 
                 _offset = updateId + 1;
@@ -200,83 +210,7 @@ public class TelegramBot
 
    
 
-    public async Task CommandListenerAsync()
-    {
-        bool listening = true;
-        while (listening)
-        {
-            var request = new HttpRequestMessage(
-                HttpMethod.Get,
-                $"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}"
-            );
-
-            var response = await _client.SendAsync(request);
-            string content = await response.Content.ReadAsStringAsync();
-
-            JObject json = JObject.Parse(content);
-            JToken? messages = json["result"];
-
-            if (messages != null)
-            {
-                foreach (JToken item in messages)
-                {
-                    JToken? message = item["message"];
-                    if (message == null) continue;
-
-                    long updateId = item.Value<long>("update_id");
-                    string? messageText = message["text"]?.ToString();
-                    string? entity = message["entities"]?[0]?["type"]?.ToString();
-                    string chatId = message["chat"]?["id"]?.ToString() ?? "0";
-
-
-                    if (entity == "bot_command")
-                    {
-                        switch (messageText)
-                        {
-                            case "/hej":
-                                await SendMessageAsync("Hej! Hvordan går det?", chatId);
-                                break;
-
-                            case "/help":
-                                await SendMessageAsync(
-                                    "Kommandoer:\n" +
-                                    "/hej - Bot siger hej\n" +
-                                    "/nadia - Spammer Nadia er smuk\n" +
-                                    "/temp - Viser temperatur i Kbh\n" +
-                                    "/help - Viser denne besked", chatId
-                                );
-                                break;
-
-                            case "/nadia":
-                                for (int i = 0; i < 10; i++)
-                                    await SendMessageAsync("Nadia er smuk", chatId);
-                                break;
-
-                            case "/temp":
-                                HTMLParser parser = new HTMLParser();
-                                double temp = await parser.GetTemperatureCPH();
-                                await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
-                                break;
-
-                            default:
-                                await SendMessageAsync("Ukendt kommando. Prøv /help", chatId);
-                                break;
-                        }
-
-                        Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {chatId}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {chatId}");
-                    }
-
-                    _offset = updateId + 1;
-                }
-            }
-
-            await Task.Delay(1000);
-        }
-    }
+    
 
 
 }
