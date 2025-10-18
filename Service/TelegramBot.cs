@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using GhadsBot.Database;
 using System.Globalization;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 //bruger Newtonsoft.Json til at parse json data
 namespace GhadsBot.Service;
@@ -30,6 +31,16 @@ public class TelegramBot
         string content = await response.Content.ReadAsStringAsync();
         Console.WriteLine(content);
         //Console.WriteLine(response.StatusCode); kan bruges til debugging
+    }
+    
+    public async Task SendMessageToAllAsync(string message)  
+    {
+        DBPerson dbp = new DBPerson();
+        List<Person> persons = (List<Person>)dbp.GetAllPersons();
+        foreach (Person p in persons)
+        {
+            await SendMessageAsync(message, p.ChatId.ToString());
+        }
     }
     public async Task<long?>  GetChatIdAsync() //henter chatId'et til den bruger der sender beskeden til botten
     {

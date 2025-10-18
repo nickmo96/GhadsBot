@@ -76,8 +76,13 @@ internal class Program
                           long chatId = (long)await bot.GetChatIdAsync(); //viser alle beskeder sendt til botten
                         break;
                     case 4:
-                        Console.WriteLine("Lytter efter beskeder sendt til botten...");
-                        await bot.CommandListenerAsync();
+                        Console.WriteLine("Skriv besked");
+                        string? msgToAll = Console.ReadLine();
+                        if(msgToAll != null)
+                        {
+                            await bot.SendMessageToAllAsync(msgToAll);
+                        }
+                       
                         break;
                     case 5:
                         Console.WriteLine("Skriv besked til Benyamin");
@@ -153,9 +158,9 @@ internal class Program
     {
         Console.WriteLine("Vælg en mulighed:");
         Console.WriteLine("1. Send besked til botten");
-        Console.WriteLine("2. Hent seneste besked sendt til botten");
+        Console.WriteLine("2. Hent seneste besked sendt til botten - VIRKER IKKE NÅR LISTENER KØRE");
         Console.WriteLine("3. Hent chat ID");
-        Console.WriteLine("4. Lyt efter beskeder sendt til botten (bugged men funktion 2");
+        Console.WriteLine("4. Send besked til alle");
         Console.WriteLine("5. Send besked til Benyamin");
         Console.WriteLine("6. hent alle person fra DB");
         Console.WriteLine("7. Opret person objekt");
