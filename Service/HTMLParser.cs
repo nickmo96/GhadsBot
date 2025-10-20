@@ -44,5 +44,18 @@ namespace GhadsBot.Service
 
             return result;
         }
+
+        public async Task<string> GetIranianNews()
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "https://api.worldnewsapi.com/search-news?api-key=0e425745e9b44202b13a23c840e5337b&source-country=ir&language=en"
+            );
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            Console.WriteLine(await response.Content.ReadAsStringAsync());
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 }

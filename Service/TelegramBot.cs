@@ -198,8 +198,13 @@ public class TelegramBot
                             double temp = await parser.GetTemperatureCPH();
                             await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
                             break;
+                            case "/news":
+                                HTMLParser parserNews = new HTMLParser();
+                               string news = await parserNews.GetIranianNews();
+                                await SendMessageAsync("Iranian news fetched. Check console for details.", dynamicChatId);
+                                break;
 
-                        default:
+                            default:
                             await SendMessageAsync("Ukendt kommando. Prøv /help", dynamicChatId);
                             break;
                     }

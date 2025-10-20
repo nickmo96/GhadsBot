@@ -14,8 +14,8 @@ internal class Program
 // BotFather fra Telegram
 // https://core.telegram.org/bots/api  Telegram Bot API Documentation
 // postman generet kode til http request og repsonen 
-//TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere
-//TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj Logging. 
+//TODO: MVC, GUI, sende beskeder til andre brugere
+//TODO: Tilføj Logging. 
 
 //TODO: LAV TUI OG COMMANDS TIL HASHMAPS, MÅSKE LAVER ENUMS TIL COMMANDS
 {
@@ -144,6 +144,11 @@ internal class Program
                     case 10:
                         HTMLParser parser = new HTMLParser();
                         await parser.GetTemperatureCPH();
+                        break;
+                    case 11:
+                        HTMLParser  parser1 = new HTMLParser();
+                        
+                        await parser1.GetIranianNews();
                         break;
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
