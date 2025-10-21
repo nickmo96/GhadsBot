@@ -6,6 +6,8 @@ using GhadsBot.Database;
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using GhadsBot.Model;
+using GhadsBot.Service;
 
 //bruger Newtonsoft.Json til at parse json data
 namespace GhadsBot.Service;
@@ -139,6 +141,42 @@ public class TelegramBot
         List<JToken?> messages = json["result"].ToList();    
         return messages;  
     }
+
+    public async Task SendNewsToUserAsync(string chatId)
+    {
+        string jsonString = await new HTMLParser().GetIranianNews();
+        JObject json = JObject.Parse(jsonString);
+
+        if (json["news"] is not JArray newsArray || newsArray.Count == 0)
+        {
+            await SendMessageAsync("Ingen iranske nyheder fundet.", chatId);
+            return;
+        }
+
+        foreach (var item in newsArray)
+        {
+            long id = item["id"]?.ToObject<long>() ?? 0;
+            string title = item["title"]?.ToString() ?? "";
+            string summary = item["summary"]?.ToString() ?? "";
+            string url = item["url"]?.ToString() ?? "";
+            string pictureUrl = item["image"]?.ToString() ?? "";
+
+            string message =
+                $"📰 *{title}*\n\n" +
+                $"{summary}\n\n" +
+                $"🔗 [Læs mere]({url})";
+
+            // Escape URL og tekst korrekt til Telegram API
+            string encodedMessage = Uri.EscapeDataString(message);
+            string sendUrl = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={encodedMessage}&parse_mode=Markdown";
+
+            await _client.GetAsync(sendUrl);
+        }
+
+        await SendMessageAsync($"Sendte {newsArray.Count} iranske nyheder.", chatId);
+        Console.WriteLine($"Sendte {newsArray.Count} nyheder til chat {chatId}");
+    }
+
     public async Task CommandListenerAsync()
     {
     while (true)
@@ -184,6 +222,7 @@ public class TelegramBot
                                 "/hej - Bot siger hej\n" +
                                 "/nadia - Spammer Nadia er smuk\n" +
                                 "/temp - Viser temperatur i Kbh\n" +
+                                "/news - Viser iranske nyheder\n" +
                                 "/help - Viser denne besked", dynamicChatId
                             );
                             break;
@@ -198,10 +237,8 @@ public class TelegramBot
                             double temp = await parser.GetTemperatureCPH();
                             await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
                             break;
-                            case "/news":
-                                HTMLParser parserNews = new HTMLParser();
-                               string news = await parserNews.GetIranianNews();
-                                await SendMessageAsync("Iranian news fetched. Check console for details.", dynamicChatId);
+                        case "/news":
+                                SendNewsToUserAsync(dynamicChatId).Wait();
                                 break;
 
                             default:
