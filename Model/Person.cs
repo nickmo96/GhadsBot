@@ -8,10 +8,10 @@ public class Person
 
     public Person(long chatId, string? firstName, string? lastName, string? username)
     {
-        ChatId = chatId;
-        FirstName = firstName;
-        LastName = lastName;
-        Username = username;
+        this.ChatId = chatId;
+        this.FirstName = firstName;
+        this.LastName = lastName;
+        this.Username = username;
     }
     public override string ToString()
     {
