@@ -14,16 +14,16 @@ internal class Program
 // BotFather fra Telegram
 // https://core.telegram.org/bots/api  Telegram Bot API Documentation
 // postman generet kode til http request og repsonen 
-<<<<<<< HEAD
+
 //TODO: MVC, GUI, give ander adgang til botten  gennem besked eller website, sende beskeder til andre brugere, lave commands til botten 
 //TODO: Lave HTML parser og indehendte data fra en hjemmeside og sende det som besked, Tilføj User og Logging
 //TODO: TUI OG COmmands til HAshMap og ENUM
-=======
+
 //TODO: MVC, GUI, sende beskeder til andre brugere
 //TODO: Tilføj Logging. 
 
 //TODO: LAV TUI OG COMMANDS TIL HASHMAPS, MÅSKE LAVER ENUMS TIL COMMANDS
->>>>>>> dev
+
 {
     private async static Task Main(string[] args)
     {
