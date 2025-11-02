@@ -210,13 +210,14 @@ public class TelegramBot
         
                 if (entity == "bot_command")
                 {
-                    switch (messageText)
+                        BotCommand command = ParseCommand(messageText);
+                    switch (command)
                     {
-                        case "/hej":
+                        case BotCommand.Hej:
                             await SendMessageAsync("Hej! Hvordan går det?", dynamicChatId);
                             break;
 
-                        case "/help":
+                        case BotCommand.Help:
                             await SendMessageAsync(
                                 "Kommandoer:\n" +
                                 "/hej - Bot siger hej\n" +
@@ -227,17 +228,17 @@ public class TelegramBot
                             );
                             break;
 
-                        case "/nadia":
+                        case BotCommand.Nadia:
                             for (int i = 0; i < 10; i++)
                                 await SendMessageAsync("Nadia er smuk", dynamicChatId);
                             break;
 
-                        case "/temp":
+                        case BotCommand.Temp:
                             HTMLParser parser = new HTMLParser();
                             double temp = await parser.GetTemperatureCPH();
                             await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
                             break;
-                        case "/news":
+                        case BotCommand.News:
                                 SendNewsToUserAsync(dynamicChatId).Wait();
                                 break;
 
@@ -261,11 +262,18 @@ public class TelegramBot
     }
 }
 
-   
-
-    
-
-
+    private BotCommand ParseCommand(string? input)
+    {
+        return input?.ToLower() switch
+        {
+            "/hej" => BotCommand.Hej,
+            "/help" => BotCommand.Help,
+            "/nadia" => BotCommand.Nadia,
+            "/temp" => BotCommand.Temp,
+            "/news" => BotCommand.News,
+            _ => BotCommand.Unknown,
+        };
+    }
 }
   
 
