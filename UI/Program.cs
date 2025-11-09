@@ -30,7 +30,7 @@ internal class Program
         TelegramBot bot = new TelegramBot();
         //bot.ListenAsync();
         //bot.CommandListenerAsync();
-        Task.Run (() => bot.CommandListenerAsync()); 
+        Task.Run(() => bot.CommandListenerAsync());
         bool running = true;
 
         PrintMenu();
@@ -44,8 +44,6 @@ internal class Program
             }
             else
             {
-                
-                
                 switch (choice)
                 {
                     case 0:
@@ -68,7 +66,7 @@ internal class Program
                                 await bot.SendMessageAsync(message, botChatId.ToString());
                                 break;
 
-                        }
+                            }
                             else
                             {
                                 Console.WriteLine("Besked ikke sendt. Afslutter.");
@@ -79,21 +77,20 @@ internal class Program
                         await bot.GetUpdatesAsync(); //henter beskeder sendt til botten igennem getUpdates http request. ID'et den retunerer vil være dit chatID
                         break;
                     case 3:
-                          long chatId = (long)await bot.GetChatIdAsync(); //viser alle beskeder sendt til botten
+                        long chatId = (long)await bot.GetChatIdAsync(); //viser alle beskeder sendt til botten
                         break;
                     case 4:
                         Console.WriteLine("Skriv besked");
                         string? msgToAll = Console.ReadLine();
-                        if(msgToAll != null)
+                        if (msgToAll != null)
                         {
                             await bot.SendMessageToAllAsync(msgToAll);
                         }
-                       
                         break;
                     case 5:
                         Console.WriteLine("Skriv besked til Benyamin");
                         string? msg = Console.ReadLine();
-                        if(msg == null)
+                        if (msg == null)
                         {
                             Console.WriteLine("Besked er tom, prøv igen");
                             break;
@@ -103,7 +100,7 @@ internal class Program
                     case 6:
                         DBPerson db = new DBPerson();
                         Console.WriteLine("alle personer i DB");
-                       foreach(Person person in db.GetAllPersons())
+                        foreach (Person person in db.GetAllPersons())
                         {
                             Console.WriteLine(person.ToString());
                         }
@@ -152,19 +149,26 @@ internal class Program
                         await parser.GetTemperatureCPH();
                         break;
                     case 11:
-                        HTMLParser  parser1 = new HTMLParser();
-                        
+                        HTMLParser parser1 = new HTMLParser();
                         await parser1.GetIranianNews();
                         break;
+                    // ----------------------------------------------------------
+                    // NYT CASE: Starter livefeed-versionen (CommandListenerAsync2)
+                    // ----------------------------------------------------------
+                    case 12:
+                        Console.WriteLine("Starter bot i LIVEFEED-tilstand (SignalR til MVC)...");
+                        await bot.InitSignalRAsync();           // Opret forbindelse til FeedHub
+                        await bot.CommandListenerAsync2();      // Start lytning med SignalR-feed
+                        break;
+
                     default:
                         Console.WriteLine("Ugyldigt input, prøv igen");
                         break;
                 }
-
             }
         }
-
     }
+
     public static void PrintMenu()
     {
         Console.WriteLine("Vælg en mulighed:");
@@ -177,7 +181,9 @@ internal class Program
         Console.WriteLine("7. Opret person objekt");
         Console.WriteLine("8. Hent person fra DB ved chatID");
         Console.WriteLine("9. Slet person fra DB ved chatID");
+        Console.WriteLine("10. Hent temperatur i København");
+        Console.WriteLine("11. Hent iranske nyheder");
+        Console.WriteLine("12. Kør bot med LIVEFEED til MVC (SignalR)");
         Console.WriteLine("0. Afslut");
-        
     }
 }

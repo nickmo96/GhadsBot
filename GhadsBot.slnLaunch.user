@@ -9,6 +9,10 @@
       {
         "Path": "..\\GhadsBotApi\\GhadsBotApi.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "GhadsBot.csproj",
+        "Action": "Start"
       }
     ]
   }

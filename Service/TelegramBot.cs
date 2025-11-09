@@ -8,12 +8,16 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using GhadsBot.Model;
 using GhadsBot.Service;
+using Microsoft.AspNetCore.SignalR.Client;
+
 
 //bruger Newtonsoft.Json til at parse json data
 namespace GhadsBot.Service;
 
 public class TelegramBot
 {
+    private HubConnection _hubConnection;
+
     private readonly string _token = "8393432003:AAFCByo9c06ZvAd2U1SHvDo-bq-h26sp-M8";
     //private readonly string _mitChatId = "7091701318"; //chatId til min test chat med botten, skal ændres til at være dynamisk senere
     private readonly HttpClient _client;
@@ -22,10 +26,21 @@ public class TelegramBot
     public TelegramBot()
     {
         _client = new HttpClient();
-        _offset = 0; 
+        _offset = 0;
     }
 
-    public async Task SendMessageAsync(string message, string chatId)  
+    // separat metode til at starte SignalR
+    public async Task InitSignalRAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7019/feedHub") // din MVC FeedHub
+            .Build();
+
+        await _hubConnection.StartAsync();
+        Console.WriteLine("Forbundet til FeedHub (SignalR).");
+    }
+
+    public async Task SendMessageAsync(string message, string chatId)
     {
         string url = $"https://api.telegram.org/bot{_token}/sendMessage?chat_id={chatId}&text={message}";
         var request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -34,8 +49,8 @@ public class TelegramBot
         Console.WriteLine(content);
         //Console.WriteLine(response.StatusCode); kan bruges til debugging
     }
-    
-    public async Task SendMessageToAllAsync(string message)  
+
+    public async Task SendMessageToAllAsync(string message)
     {
         DBPerson dbp = new DBPerson();
         List<Person> persons = (List<Person>)dbp.GetAllPersons();
@@ -44,7 +59,8 @@ public class TelegramBot
             await SendMessageAsync(message, p.ChatId.ToString());
         }
     }
-    public async Task<long?>  GetChatIdAsync() //henter chatId'et til den bruger der sender beskeden til botten
+
+    public async Task<long?> GetChatIdAsync() //henter chatId'et til den bruger der sender beskeden til botten
     {
         string url = $"https://api.telegram.org/bot{_token}/getUpdates";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -57,27 +73,22 @@ public class TelegramBot
         long? res = null;
         if (messages != null && messages.HasValues)
         {
-             foreach (JToken item in messages)
-        {
-        if (item != null)
-        {
-            string? chatId = item["message"]?["chat"]?["id"]?.ToString();
-            if (chatId != null)
+            foreach (JToken item in messages)
             {
-                long parsedId = long.Parse(chatId);
-                Console.WriteLine($"Chat ID: {parsedId}");
-                res = parsedId;
-                
+                if (item != null)
+                {
+                    string? chatId = item["message"]?["chat"]?["id"]?.ToString();
+                    if (chatId != null)
+                    {
+                        long parsedId = long.Parse(chatId);
+                        Console.WriteLine($"Chat ID: {parsedId}");
+                        res = parsedId;
+                    }
+                }
             }
         }
-    }
-        }
-       
-
-   
-
         return res; //returnerer null hvis der ikke er nogen beskeder   
-}
+    }
 
     public async Task GetUpdatesAsync()
     {
@@ -86,7 +97,6 @@ public class TelegramBot
         var response = await _client.SendAsync(request);
         string content = await response.Content.ReadAsStringAsync();
         Console.WriteLine(content);
-
 
         JObject json = JObject.Parse(content); //parser json data fra response
         JToken? messages = json["result"]; //henter som json array der indeholder alle parsede json objekter
@@ -101,12 +111,10 @@ public class TelegramBot
                     string? lastName = item["message"]?["chat"]?["last_name"]?.ToString();
                     string? username = item["message"]?["chat"]?["username"]?.ToString();
 
-                   
                     DBPerson dbp = new DBPerson();
 
                     if (await dbp.GetPersonByChatIDAsync(chatId) == null)
                     {
-                        
                         Person p = new Person(chatId, firstName, lastName, username);
                         Console.WriteLine($"Ny bruger fundet, tilføjer til database." + p.ToString());
                         dbp.InsertPerson(p);
@@ -132,14 +140,14 @@ public class TelegramBot
         string content = await response.Content.ReadAsStringAsync();
 
         return content;
-
     }
-     public async Task<List<JToken>> ParseTelegramUpdatesAsync()
+
+    public async Task<List<JToken>> ParseTelegramUpdatesAsync()
     {
         string content = await FetchTelegramUpdatesUpdates();
         JObject json = JObject.Parse(content);
-        List<JToken?> messages = json["result"].ToList();    
-        return messages;  
+        List<JToken?> messages = json["result"].ToList();
+        return messages;
     }
 
     public async Task SendNewsToUserAsync(string chatId)
@@ -177,44 +185,140 @@ public class TelegramBot
         Console.WriteLine($"Sendte {newsArray.Count} nyheder til chat {chatId}");
     }
 
+    // --------------------------------------------------------------------------
+    // ORIGINAL VERSION: CommandListenerAsync (uden SignalR)
+    // --------------------------------------------------------------------------
     public async Task CommandListenerAsync()
     {
-    while (true)
-    {
-        List<JToken>? messages = await ParseTelegramUpdatesAsync();
-
-        if (messages != null && messages.Count > 0)
+        while (true)
         {
-            foreach (JToken item in messages)
+            List<JToken>? messages = await ParseTelegramUpdatesAsync();
+
+            if (messages != null && messages.Count > 0)
             {
-                JToken? message = item["message"];
-                if (message == null) continue;
+                foreach (JToken item in messages)
+                {
+                    JToken? message = item["message"];
+                    if (message == null) continue;
 
-                long updateId = item.Value<long>("update_id");
-                string? messageText = message["text"]?.ToString();
-                string? entity = message["entities"]?[0]?["type"]?.ToString();
-                string dynamicChatId = message["chat"]?["id"]?.ToString() ?? "0";
+                    long updateId = item.Value<long>("update_id");
+                    string? messageText = message["text"]?.ToString();
+                    string? entity = message["entities"]?[0]?["type"]?.ToString();
+                    string dynamicChatId = message["chat"]?["id"]?.ToString() ?? "0";
                     long staticChatId = (long)item["message"]?["chat"]?["id"];
-                DBPerson dbp = new DBPerson();
-                if(dbp.GetPersonByChatIDAsync(staticChatId).Result == null)
-                {
-                    string? firstName = item["message"]?["chat"]?["first_name"]?.ToString();
-                    string? lastName = item["message"]?["chat"]?["last_name"]?.ToString();
-                    string? username = item["message"]?["chat"]?["username"]?.ToString();
+                    DBPerson dbp = new DBPerson();
 
-                    Person p = new Person(staticChatId, firstName, lastName, username);
-                    Console.WriteLine($"Ny bruger fundet, tilføjer til database." + p.ToString());
-                    dbp.InsertPerson(p);
-                }
+                    if (dbp.GetPersonByChatIDAsync(staticChatId).Result == null)
+                    {
+                        string? firstName = item["message"]?["chat"]?["first_name"]?.ToString();
+                        string? lastName = item["message"]?["chat"]?["last_name"]?.ToString();
+                        string? username = item["message"]?["chat"]?["username"]?.ToString();
 
-        
-                if (entity == "bot_command")
-                {
+                        Person p = new Person(staticChatId, firstName, lastName, username);
+                        Console.WriteLine($"Ny bruger fundet, tilføjer til database." + p.ToString());
+                        dbp.InsertPerson(p);
+                    }
+
+                    if (entity == "bot_command")
+                    {
                         BotCommand command = ParseCommand(messageText);
+                        switch (command)
+                        {
+                            case BotCommand.Hej:
+                                await SendMessageAsync("Hej! Hvordan går det?", dynamicChatId);
+                                break;
+
+                            case BotCommand.Help:
+                                await SendMessageAsync(
+                                    "Kommandoer:\n" +
+                                    "/hej - Bot siger hej\n" +
+                                    "/nadia - Spammer Nadia er smuk\n" +
+                                    "/temp - Viser temperatur i Kbh\n" +
+                                    "/news - Viser iranske nyheder\n" +
+                                    "/help - Viser denne besked", dynamicChatId
+                                );
+                                break;
+
+                            case BotCommand.Nadia:
+                                for (int i = 0; i < 10; i++)
+                                    await SendMessageAsync("Nadia er smuk", dynamicChatId);
+                                break;
+
+                            case BotCommand.Temp:
+                                HTMLParser parser = new HTMLParser();
+                                double temp = await parser.GetTemperatureCPH();
+                                await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
+                                break;
+
+                            case BotCommand.News:
+                                SendNewsToUserAsync(dynamicChatId).Wait();
+                                break;
+
+                            default:
+                                await SendMessageAsync("Ukendt kommando. Prøv /help", dynamicChatId);
+                                break;
+                        }
+
+                        Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {dynamicChatId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {dynamicChatId}");
+                    }
+
+                    _offset = updateId + 1;
+                }
+            }
+
+            await Task.Delay(1000);
+        }
+    }
+
+    // --------------------------------------------------------------------------
+    // NY VERSION: CommandListenerAsync2 (med SignalR-feed til MVC)
+    // --------------------------------------------------------------------------
+    public async Task CommandListenerAsync2()
+    {
+        // Sørg for at SignalR er startet
+        if (_hubConnection == null)
+            await InitSignalRAsync();
+
+        while (true)
+        {
+            string content = await _client.GetStringAsync($"https://api.telegram.org/bot{_token}/getUpdates?offset={_offset}");
+            JObject json = JObject.Parse(content);
+            var messages = json["result"]?.ToList();
+
+            if (messages == null || messages.Count == 0)
+            {
+                await Task.Delay(1000);
+                continue;
+            }
+
+            foreach (var item in messages)
+            {
+                long updateId = item.Value<long>("update_id");
+                string? text = item["message"]?["text"]?.ToString();
+                string? chatId = item["message"]?["chat"]?["id"]?.ToString();
+                string? username = item["message"]?["chat"]?["username"]?.ToString();
+
+                if (text == null || chatId == null) continue;
+
+                // Vis i konsol
+                Console.WriteLine($"[{DateTime.Now:T}] {username}: {text}");
+
+                // Send til webapp livefeed
+                string displayName = string.IsNullOrEmpty(username) ? "Ukendt bruger" : username;
+                await _hubConnection.InvokeAsync("SendFeed", $"[{DateTime.Now:T}] {displayName} : {text}");
+
+                // Håndter kommandoer samtidig
+                if (text.StartsWith("/"))
+                {
+                    BotCommand command = ParseCommand(text);
                     switch (command)
                     {
                         case BotCommand.Hej:
-                            await SendMessageAsync("Hej! Hvordan går det?", dynamicChatId);
+                            await SendMessageAsync("Hej! Hvordan går det?", chatId);
                             break;
 
                         case BotCommand.Help:
@@ -224,43 +328,36 @@ public class TelegramBot
                                 "/nadia - Spammer Nadia er smuk\n" +
                                 "/temp - Viser temperatur i Kbh\n" +
                                 "/news - Viser iranske nyheder\n" +
-                                "/help - Viser denne besked", dynamicChatId
-                            );
+                                "/help - Viser denne besked", chatId);
                             break;
 
                         case BotCommand.Nadia:
                             for (int i = 0; i < 10; i++)
-                                await SendMessageAsync("Nadia er smuk", dynamicChatId);
+                                await SendMessageAsync("Nadia er smuk", chatId);
                             break;
 
                         case BotCommand.Temp:
                             HTMLParser parser = new HTMLParser();
                             double temp = await parser.GetTemperatureCPH();
-                            await SendMessageAsync($"Temperaturen i København er: {temp}°C", dynamicChatId);
+                            await SendMessageAsync($"Temperaturen i København er: {temp}°C", chatId);
                             break;
-                        case BotCommand.News:
-                                SendNewsToUserAsync(dynamicChatId).Wait();
-                                break;
 
-                            default:
-                            await SendMessageAsync("Ukendt kommando. Prøv /help", dynamicChatId);
+                        case BotCommand.News:
+                            await SendNewsToUserAsync(chatId);
+                            break;
+
+                        default:
+                            await SendMessageAsync("Ukendt kommando. Prøv /help", chatId);
                             break;
                     }
-
-                    Console.WriteLine($"Ny kommando modtaget: {messageText} fra chat ID: {dynamicChatId}");
-                }
-                else
-                {
-                    Console.WriteLine($"Ny besked modtaget: {messageText} fra chat ID: {dynamicChatId}");
                 }
 
                 _offset = updateId + 1;
             }
-        }
 
-        await Task.Delay(1000);
+            await Task.Delay(1000);
+        }
     }
-}
 
     private BotCommand ParseCommand(string? input)
     {
@@ -275,12 +372,3 @@ public class TelegramBot
         };
     }
 }
-  
-
-
-
-          
-        
-    
-
-
